@@ -10,10 +10,13 @@ import logging
 from pathlib import Path
 import os
 import time
+from pdb import set_trace as bp
 
 import torch
 import torch.nn.functional as F
 
+from .prePrepetual import get_distance
+#from .dpamer import Preploss
 from . import augment, distrib, pretrained
 from .enhance import enhance
 from .evaluate import evaluate
@@ -197,6 +200,10 @@ class Solver(object):
         label = ["Train", "Valid"][cross_valid]
         name = label + f" | Epoch {epoch + 1}"
         logprog = LogProgress(logger, data_loader, updates=self.num_prints, name=name)
+
+        sc_loss, mag_loss = 0, 0 # To make it work even when MultiResolution STFT loss is turned off
+        al, bt, ga = 1 , 1 , 1
+
         for i, data in enumerate(logprog):
             noisy, clean = [x.to(self.device) for x in data]
             if not cross_valid:
@@ -207,6 +214,7 @@ class Solver(object):
             estimate = self.dmodel(noisy)
             # apply a loss function after each layer
             with torch.autograd.set_detect_anomaly(True):
+              if not self.args.ploss: 
                 if self.args.loss == 'l1':
                     loss = F.l1_loss(clean, estimate)
                 elif self.args.loss == 'l2':
@@ -219,9 +227,19 @@ class Solver(object):
                 if self.args.stft_loss:
                     sc_loss, mag_loss = self.mrstftloss(estimate.squeeze(1), clean.squeeze(1))
                     loss += sc_loss + mag_loss
+                
+                # perceptual loss
+              else:
+                    prepetualLoss = get_distance(clean.squeeze(1),estimate.squeeze(1)).mean()
+                    print("prloss ", prepetualLoss )
+                    wav_loss = F.l1_loss(clean, estimate)
+                    sc_loss, mag_loss = self.mrstftloss(estimate.squeeze(1), clean.squeeze(1))
+                    P_loss = prepetualLoss
+                    loss = al * wav_loss  + bt * (sc_loss + mag_loss) + ga * (P_loss)
+                    loss = wav_loss
 
                 # optimize model in training mode
-                if not cross_valid:
+              if not cross_valid:
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
