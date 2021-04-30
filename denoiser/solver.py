@@ -231,12 +231,10 @@ class Solver(object):
                 # perceptual loss
               else:
                     prepetualLoss = get_distance(clean.squeeze(1),estimate.squeeze(1)).mean()
-                    print("prloss ", prepetualLoss )
                     wav_loss = F.l1_loss(clean, estimate)
                     sc_loss, mag_loss = self.mrstftloss(estimate.squeeze(1), clean.squeeze(1))
                     P_loss = prepetualLoss
                     loss = al * wav_loss  + bt * (sc_loss + mag_loss) + ga * (P_loss)
-                    loss = wav_loss
 
                 # optimize model in training mode
               if not cross_valid:
