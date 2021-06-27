@@ -22,18 +22,23 @@ from .enhance import enhance
 from .evaluate import evaluate
 from .stft_loss import MultiResolutionSTFTLoss
 from .utils import bold, copy_state, pull_metric, serialize_model, swap_state, LogProgress
+from torch.utils.tensorboard import SummaryWriter
+
 
 logger = logging.getLogger(__name__)
 
 
 class Solver(object):
     def __init__(self, data, model, optimizer, args):
+        torch.manual_seed(1)
+        torch.cuda.manual_seed(1)
         self.tr_loader = data['tr_loader']
         self.cv_loader = data['cv_loader']
         self.tt_loader = data['tt_loader']
         self.model = model
         self.dmodel = distrib.wrap(model)
         self.optimizer = optimizer
+ #       self.scheduler = scheduler
 
         # data augment
         augments = []
@@ -61,7 +66,7 @@ class Solver(object):
             self.best_file = Path(args.best_file)
             logger.debug("Checkpoint will be saved to %s", self.checkpoint_file.resolve())
         self.history_file = args.history_file
-
+        
         self.best_state = None
         self.restart = args.restart
         self.history = []  # Keep track of loss
@@ -125,6 +130,7 @@ class Solver(object):
 
     def train(self):
         # Optimizing the model
+        writer = SummaryWriter('runs/epoch_level_loss')
         if self.history:
             logger.info("Replaying metrics from previous run")
         for epoch, metrics in enumerate(self.history):
@@ -141,6 +147,7 @@ class Solver(object):
             logger.info(
                 bold(f'Train Summary | End of Epoch {epoch + 1} | '
                      f'Time {time.time() - start:.2f}s | Train Loss {train_loss:.5f}'))
+            writer.add_scalar("Loss/train", train_loss, epoch)
 
             if self.cv_loader:
                 # Cross validation
@@ -152,6 +159,7 @@ class Solver(object):
                 logger.info(
                     bold(f'Valid Summary | End of Epoch {epoch + 1} | '
                          f'Time {time.time() - start:.2f}s | Valid Loss {valid_loss:.5f}'))
+                writer.add_scalar("Loss/valid", valid_loss, epoch)
             else:
                 valid_loss = 0
 
@@ -189,6 +197,7 @@ class Solver(object):
                 if self.checkpoint:
                     self._serialize()
                     logger.debug("Checkpoint saved to %s", self.checkpoint_file.resolve())
+        writer.close()            
 
     def _run_one_epoch(self, epoch, cross_valid=False):
         total_loss = 0
@@ -202,7 +211,8 @@ class Solver(object):
         logprog = LogProgress(logger, data_loader, updates=self.num_prints, name=name)
 
         sc_loss, mag_loss = 0, 0 # To make it work even when MultiResolution STFT loss is turned off
-        al, bt, ga = 1 , 1 , 1
+        al, bt, ga = 0.45 , 0.45 , 0.45
+        writer = SummaryWriter('runs/mini-Batch_level_loss')
 
         for i, data in enumerate(logprog):
             noisy, clean = [x.to(self.device) for x in data]
@@ -230,10 +240,9 @@ class Solver(object):
                 
                 # perceptual loss
               else:
-                    prepetualLoss = get_distance(clean.squeeze(1),estimate.squeeze(1)).mean()
+                    P_loss = get_distance(clean.squeeze(1),estimate.squeeze(1)).mean()
                     wav_loss = F.l1_loss(clean, estimate)
                     sc_loss, mag_loss = self.mrstftloss(estimate.squeeze(1), clean.squeeze(1))
-                    P_loss = prepetualLoss
                     loss = al * wav_loss  + bt * (sc_loss + mag_loss) + ga * (P_loss)
 
                 # optimize model in training mode
@@ -241,9 +250,15 @@ class Solver(object):
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
+                    
 
             total_loss += loss.item()
+            #self.scheduler.step(total_loss)
+            writer.add_scalar("Loss/minibatch-total_loss", total_loss, i)
+
             logprog.update(loss=format(total_loss / (i + 1), ".5f"))
             # Just in case, clear some memory
             del loss, estimate
+        writer.close()
         return distrib.average([total_loss / (i + 1)], i + 1)[0]
+
