@@ -8,6 +8,7 @@ conda activate denoise
 
 if [ $stage -eq 1 ]; then
 
-python train.py
+CUDA_VISIBLE_DEVICES=2 python train.py continue_pretrained=dns48
 
 fi
+
