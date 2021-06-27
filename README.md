@@ -1,4 +1,9 @@
-# Real Time Speech Enhancement in the Waveform Domain (Interspeech 2020)
+# Perceptual-based Deep-Learning Denoiser as a Defense Against Adversarial Attacks on ASR Systems 
+
+
+## This is an addaptation of the "Real Time Speech Enhancement in the Waveform Domain (Interspeech 2020)" for adversarial attack on ASR systems.
+
+A perceptually inspired loss function is added to the existing L1 loss and the STFT loss with varied weights and the dns48 model is finetuned on the dataset
 
 ![tests badge](https://github.com/facebookresearch/denoiser/workflows/tests/badge.svg)
 
