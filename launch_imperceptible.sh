@@ -7,6 +7,6 @@
 # authors: adiyoss and adefossez
 
 python train.py \
-  dset=imperceptible \
+  dset=Valentini_imperceptible \
   continue_pretrained=dns48
 
