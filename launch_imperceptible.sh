@@ -8,6 +8,5 @@
 
 python train.py \
   dset=Valentini_imperceptible \
-  continue_pretrained=dns48 \
-  pad=False
+  continue_pretrained=dns48 
 

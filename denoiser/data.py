@@ -90,6 +90,7 @@ class NoisyCleanSet:
         kw = {'length': length, 'stride': stride, 'pad': pad, 'sample_rate': sample_rate}
         self.clean_set = Audioset(clean, **kw)
         self.noisy_set = Audioset(noisy, **kw)
+        print(len(self.noisy_set), len(self.clean_set))
         
         assert len(self.clean_set) == len(self.noisy_set)
 
