@@ -78,6 +78,7 @@ class NoisyCleanSet:
         :param pad: pad the end of the sequence with zeros
         :param sample_rate: the signals sampling rate
         """
+        print(json_dir)
         noisy_json = os.path.join(json_dir, 'noisy.json')
         clean_json = os.path.join(json_dir, 'clean.json')
         with open(noisy_json, 'r') as f:
@@ -90,7 +91,6 @@ class NoisyCleanSet:
         self.clean_set = Audioset(clean, **kw)
         self.noisy_set = Audioset(noisy, **kw)
         
-        print(len(self.clean_set), len(self.noisy_set))
         assert len(self.clean_set) == len(self.noisy_set)
 
     def __getitem__(self, index):
