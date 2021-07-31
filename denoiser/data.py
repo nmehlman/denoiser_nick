@@ -78,7 +78,7 @@ class NoisyCleanSet:
         :param pad: pad the end of the sequence with zeros
         :param sample_rate: the signals sampling rate
         """
-     
+        print(json_dir)
         noisy_json = os.path.join(json_dir, 'noisy.json')
         clean_json = os.path.join(json_dir, 'clean.json')
         with open(noisy_json, 'r') as f:
