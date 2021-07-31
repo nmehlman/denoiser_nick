@@ -6,5 +6,7 @@ dset:
                        # every `eval_every` epochs.
   noisy_json:  # files to enhance. Those will be stored in the experiment
                                        # `samples` folder for easy subjective evaluation of the model.
-  noisy_dir:      # how to match noisy and clean files. For Valentini, use sort, for DNS, use dns.
+  noisy_dir:
+  
+  matching: sort  # how to match noisy and clean files. For Valentini, use sort, for DNS, use dns.
 eval_every: 1
