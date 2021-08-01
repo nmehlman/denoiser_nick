@@ -8,5 +8,6 @@
 
 python train.py \
   dset=Valentini_imperceptible \
-  continue_pretrained=dns48 
+  continue_pretrained=dns48 \
+  batch_size=64
 
