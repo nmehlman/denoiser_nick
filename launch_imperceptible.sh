@@ -9,5 +9,5 @@
 python train.py \
   dset=Valentini_imperceptible \
   continue_pretrained=dns48 \
-  batch_size=64
+  batch_size=1
 
