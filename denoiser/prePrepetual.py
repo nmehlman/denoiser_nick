@@ -7,7 +7,7 @@ import timeit
 from .models import JNDnet
 
 def get_distance(ref, pre):
-    pretrained_path = "/data/home/nmehlman/denoiser_nick/denoiser"
+    pretrained_path = "/home/nmehlman/denoiser_nick/denoiser"
     mname = "/dataset_combined_linear" 
     state = torch.load(pretrained_path+mname+'.pth',map_location="cpu")['state']
 
