@@ -57,6 +57,9 @@ stft_sc_factor: .5
 stft_mag_factor: .5
 epochs: 400
 batch_size: 64
+alpha: .45
+beta: .45
+gamma: .45
 
 # Models
 model: demucs # either demucs or dwave

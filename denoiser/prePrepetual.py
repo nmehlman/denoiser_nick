@@ -25,6 +25,5 @@ def get_distance(ref, pre):
     model.cuda()
     model.eval()
 
-    #print('forward distance net')
     dist = model.model_dist.forward(ref,pre)
     return dist
