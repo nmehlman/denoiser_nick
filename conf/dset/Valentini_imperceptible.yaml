@@ -1,6 +1,6 @@
 dset:
   train: /home/nmehlman/denoiser_JSON/train  # path to train folder, should contain both a noisy.json and clean.json file
-  valid: /home/nmehlman/denoiser_JSON/valid  # path to the validation folder.
+  valid: /home/nmehlman/denoiser_JSON/val  # path to the validation folder.
                        # If not set, the last epoch is kept rather than the best
   test: /home/nmehlman/denoiser_JSON/test   # Path to the test set. Metrics like STOI and PESQ are evaluated on it
                        # every `eval_every` epochs.
