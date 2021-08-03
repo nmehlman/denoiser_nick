@@ -96,7 +96,7 @@ hydra:
       # configuration for the ${hydra.job.override_dirname} runtime variable
       override_dirname:
         kv_sep: '='
-        item_sep: ','
+        item_sep: '_'
         # Remove all paths, as the / in them would mess up things
         # Remove params that would not impact the training itself
         # Remove all slurm and submit params.

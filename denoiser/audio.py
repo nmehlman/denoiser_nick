@@ -11,6 +11,7 @@ from pathlib import Path
 import math
 import os
 import sys
+from typing import Tuple
 
 import torchaudio
 from torch.nn import functional as F
@@ -99,6 +100,21 @@ class Audioset:
             else:
                 return out
 
+class AudiosetText(Audioset):
+
+    def __init__(self, *pargs, **kargs):
+        if "text_path" in kargs:
+            self.text_path = kargs["text_path"]
+            kargs.pop("test_path")
+        super().__init__(*pargs, **kargs)
+
+    def __getitem__(self, index):
+        data = super().__getitem__(index)
+        if type(data) == Tuple:
+            out, file = data[0], data[1]
+        else:
+            out = data
+        
 
 if __name__ == "__main__":
     meta = []
