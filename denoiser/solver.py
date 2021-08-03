@@ -272,14 +272,16 @@ class Solver(object):
         return distrib.average([total_loss / (i + 1)], i + 1)[0]
 
 def get_text(text_info):
-    id1, id2, id3 = text_info
-    text_file_path = os.path.join(TEXT_DIR, id1, id2, '%s-%s.trans.txt' % (id1, id2))
-    line_id = '%s-%s-%s' % (id1, id2, id3)
-    with open(text_file_path, 'r') as text_file:
-        for line in text_file:
-            id = line[ :line.find(' ')]
-            txt = line[ line.find(' ') + 1: ].rstrip()
-            if id == line_id:
-                return  txt
-    
-    raise Exception('text ID not found')
+    texts = []
+    for id1, id2, id3 in zip(text_info[0], text_info[1], text_info[2]):
+        text_file_path = os.path.join(TEXT_DIR, id1, id2, '%s-%s.trans.txt' % (id1, id2))
+        line_id = '%s-%s-%s' % (id1, id2, id3)
+        with open(text_file_path, 'r') as text_file:
+            for line in text_file:
+                id = line[ :line.find(' ')]
+                txt = line[ line.find(' ') + 1: ].rstrip()
+                if id == line_id:
+                    texts.append(txt)
+                    continue
+        raise Exception('text ID not found')
+    return texts
