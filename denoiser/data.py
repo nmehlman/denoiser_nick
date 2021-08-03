@@ -83,6 +83,8 @@ class NoisyCleanSet:
         :param sample_rate: the signals sampling rate
         """
 
+        self.with_text = with_text
+
         noisy_json = os.path.join(json_dir, 'noisy.json')
         clean_json = os.path.join(json_dir, 'clean.json')
         with open(noisy_json, 'r') as f:
@@ -103,7 +105,10 @@ class NoisyCleanSet:
         assert len(self.clean_set) == len(self.noisy_set)
 
     def __getitem__(self, index):
-        return self.noisy_set[index], self.clean_set[index], self.text_files[index]
+        if self.with_text:
+            return self.noisy_set[index], self.clean_set[index], self.text_files[index]
+        else:
+            return self.noisy_set[index], self.clean_set[index]
 
     def __len__(self):
         return len(self.noisy_set)
