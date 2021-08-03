@@ -24,6 +24,7 @@ from .stft_loss import MultiResolutionSTFTLoss
 from .utils import bold, copy_state, pull_metric, serialize_model, swap_state, LogProgress
 from torch.utils.tensorboard import SummaryWriter
 
+TEXT_DIR = '/home/asreeram/data/librispeech/LibriSpeech/dev-clean'
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +132,7 @@ class Solver(object):
             model = getattr(pretrained, self.args.continue_pretrained)()
             self.model.load_state_dict(model.state_dict())
 
-    def train(self):
+    def train(self, ctc=False):
         # Optimizing the model
         writer = SummaryWriter('runs/epoch_level_loss')
         if self.history:
@@ -146,7 +147,7 @@ class Solver(object):
             start = time.time()
             logger.info('-' * 70)
             logger.info("Training...")
-            train_loss = self._run_one_epoch(epoch)
+            train_loss = self._run_one_epoch(epoch, ctc=ctc)
             logger.info(
                 bold(f'Train Summary | End of Epoch {epoch + 1} | '
                      f'Time {time.time() - start:.2f}s | Train Loss {train_loss:.5f}'))
@@ -202,7 +203,7 @@ class Solver(object):
                     logger.debug("Checkpoint saved to %s", self.checkpoint_file.resolve())
         writer.close()            
 
-    def _run_one_epoch(self, epoch, cross_valid=False):
+    def _run_one_epoch(self, epoch, cross_valid=False, ctc=False):
         total_loss = 0
         data_loader = self.tr_loader if not cross_valid else self.cv_loader
 
@@ -217,7 +218,11 @@ class Solver(object):
         writer = SummaryWriter('runs/mini-Batch_level_loss')
 
         for i, data in enumerate(logprog):
-            noisy, clean = [x.to(self.device) for x in data]
+            if ctc:
+                noisy, clean, text_info = [x.to(self.device) for x in data]
+                print(get_text(text_info))
+            else:
+                noisy, clean = [x.to(self.device) for x in data]
             if not cross_valid:
                 sources = torch.stack([noisy - clean, clean])
                 sources = self.augment(sources)
@@ -252,7 +257,6 @@ class Solver(object):
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
-                    
 
             total_loss += loss.item()
             #self.scheduler.step(total_loss)
@@ -264,3 +268,15 @@ class Solver(object):
         writer.close()
         return distrib.average([total_loss / (i + 1)], i + 1)[0]
 
+def get_text(text_info):
+    id1, id2, id3 = text_info
+    text_file_path = os.path.join(TEXT_DIR, id1, id2, '%s-%s.trans.txt' % (id1, id2))
+    line_id = '%s-%s-%s' % (id1, id2, id3)
+    with open(text_file_path, 'r') as text_file:
+        for line in text_file:
+            id = line[ :line.find(' ')]
+            txt = line[ line.find(' ') + 1: ].rstrip()
+            if id == line_id:
+                return  txt
+    
+    raise Exception('text ID not found')

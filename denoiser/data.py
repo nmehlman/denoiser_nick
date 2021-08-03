@@ -14,6 +14,10 @@ from .audio import Audioset
 
 logger = logging.getLogger(__name__)
 
+def parse_filename(path):
+    file_name = path.split('/')[-1].replace('.wav', '')
+    id1, id2, id3 = file_name.split('-')
+    return id1, id2, id3
 
 def match_dns(noisy, clean):
     """match_dns.
@@ -68,7 +72,7 @@ def match_files(noisy, clean, matching="sort"):
 
 class NoisyCleanSet:
     def __init__(self, json_dir, matching="sort", length=None, stride=None,
-                 pad=True, sample_rate=None):
+                 pad=True, sample_rate=None, with_text=False):
         """__init__.
 
         :param json_dir: directory containing both clean.json and noisy.json
@@ -87,6 +91,11 @@ class NoisyCleanSet:
             clean = json.load(f)
 
         match_files(noisy, clean, matching)
+        if with_text:
+            self.text_files = []
+            for path in clean:
+                (id1, id2, id3) = parse_filename(path)
+                self.text_files.append( (id1, id2, id3) )
         kw = {'length': length, 'stride': stride, 'pad': pad, 'sample_rate': sample_rate}
         self.clean_set = Audioset(clean, **kw)
         self.noisy_set = Audioset(noisy, **kw)
@@ -94,7 +103,10 @@ class NoisyCleanSet:
         assert len(self.clean_set) == len(self.noisy_set)
 
     def __getitem__(self, index):
-        return self.noisy_set[index], self.clean_set[index]
+        return self.noisy_set[index], self.clean_set[index], self.text_files[index]
 
     def __len__(self):
         return len(self.noisy_set)
+
+if __name__ == '__main__':
+    print(parse_filename('/home/asreeram/data/librispeech/LibriSpeech/dev_clean_wav/1272-128104-0001.wav'))
