@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 
 
 class Solver(object):
-    def __init__(self, data, model, optimizer, args):
+    def __init__(self, data, model, optimizer, args, ctc):
+        self.ctc=ctc
         torch.manual_seed(1)
         torch.cuda.manual_seed(1)
         self.tr_loader = data['tr_loader']
@@ -203,7 +204,7 @@ class Solver(object):
                     logger.debug("Checkpoint saved to %s", self.checkpoint_file.resolve())
         writer.close()            
 
-    def _run_one_epoch(self, epoch, cross_valid=False, ctc=False):
+    def _run_one_epoch(self, epoch, cross_valid=False):
         total_loss = 0
         data_loader = self.tr_loader if not cross_valid else self.cv_loader
 
@@ -218,7 +219,7 @@ class Solver(object):
         writer = SummaryWriter('runs/mini-Batch_level_loss')
 
         for i, data in enumerate(logprog):
-            if ctc:
+            if self.ctc:
                 noisy, clean = [x.to(self.device) for x in data[:-1]]
                 text_info=data[-1]
                 print(get_text(text_info))
