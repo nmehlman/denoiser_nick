@@ -219,7 +219,8 @@ class Solver(object):
 
         for i, data in enumerate(logprog):
             if ctc:
-                noisy, clean, text_info = [x.to(self.device) for x in data]
+                noisy, clean = [x.to(self.device) for x in data[:-1]]
+                text_info=data[-1]
                 print(get_text(text_info))
             else:
                 noisy, clean = [x.to(self.device) for x in data]
