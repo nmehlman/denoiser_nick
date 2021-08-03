@@ -96,11 +96,6 @@ class NoisyCleanSet:
             clean = json.load(f)
 
         match_files(noisy, clean, matching)
-        if with_text:
-            self.text_files = []
-            for path in clean:
-                (id1, id2, id3) = parse_filename(path[0])
-                self.text_files.append( (id1, id2, id3) )
         kw = {'length': length, 'stride': stride, 'pad': pad, 'sample_rate': sample_rate}
         self.clean_set = Audioset(clean, **kw)
         self.noisy_set = Audioset(noisy, **kw)
