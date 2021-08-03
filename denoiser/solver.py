@@ -222,7 +222,7 @@ class Solver(object):
             if self.ctc:
                 noisy, clean = [x.to(self.device) for x in data[:-1]]
                 text_info=data[-1]
-                print(get_text(text_info))
+                print(text_info)
             else:
                 noisy, clean = [x.to(self.device) for x in data]
             if not cross_valid:
