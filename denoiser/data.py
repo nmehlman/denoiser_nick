@@ -101,12 +101,13 @@ class NoisyCleanSet:
         kw = {'length': length, 'stride': stride, 'pad': pad, 'sample_rate': sample_rate}
         self.clean_set = Audioset(clean, **kw)
         self.noisy_set = Audioset(noisy, **kw)
+        self.text_set = Audioset(clean, with_path=True, **kw)
         
         assert len(self.clean_set) == len(self.noisy_set)
 
     def __getitem__(self, index):
         if self.with_text:
-            return self.noisy_set[index], self.clean_set[index], self.text_files[index]
+            return self.noisy_set[index], self.clean_set[index], parse_filename(self.text_set[index][1])
         else:
             return self.noisy_set[index], self.clean_set[index]
 
