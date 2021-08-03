@@ -14,14 +14,10 @@ from .audio import Audioset
 
 logger = logging.getLogger(__name__)
 
-def parse_filenames(path_list):
-    paths = []
-    for path in path_list:
-        print(path)
-        file_name = path.split('/')[-1].replace('.wav', '')
-        id1, id2, id3 = file_name.split('-')
-        paths.append((id1,id2,id3))
-    return paths
+def parse_filename(path):
+    file_name = path.split('/')[-1].replace('.wav', '')
+    id1, id2, id3 = file_name.split('-')
+    return id1, id2, id3
 
 def match_dns(noisy, clean):
     """match_dns.
@@ -107,7 +103,7 @@ class NoisyCleanSet:
     def __getitem__(self, index):
         if self.with_text:
             print(self.text_set[index][1])
-            return self.noisy_set[index], self.clean_set[index], parse_filenames(self.text_set[index][1])
+            return self.noisy_set[index], self.clean_set[index], parse_filename(self.text_set[index][1])
         else:
             return self.noisy_set[index], self.clean_set[index]
 
