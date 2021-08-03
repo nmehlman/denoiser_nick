@@ -116,6 +116,3 @@ class NoisyCleanSet:
 
     def __len__(self):
         return len(self.noisy_set)
-
-if __name__ == '__main__':
-    print(parse_filename('/home/asreeram/data/librispeech/LibriSpeech/dev_clean_wav/1272-128104-0001.wav'))
