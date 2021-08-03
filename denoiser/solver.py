@@ -275,15 +275,12 @@ def get_text(text_info):
     texts = []
     for id1, id2, id3 in zip(text_info[0], text_info[1], text_info[2]):
         text_file_path = os.path.join(TEXT_DIR, id1, id2, '%s-%s.trans.txt' % (id1, id2))
-        print(text_file_path)
         line_id = '%s-%s-%s' % (id1, id2, id3)
         with open(text_file_path, 'r') as text_file:
             for line in text_file:
                 id = line[ :line.find(' ')]
-                print(id, line_id)
                 txt = line[ line.find(' ') + 1: ].rstrip()
                 if id == line_id:
                     texts.append(txt)
-                    continue
-        raise Exception('text ID not found')
+                    break
     return texts
