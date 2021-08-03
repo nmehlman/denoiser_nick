@@ -106,6 +106,8 @@ class NoisyCleanSet:
 
     def __getitem__(self, index):
         if self.with_text:
+            print(idx)
+            print(self.text_set[idx])
             return self.noisy_set[index], self.clean_set[index], parse_filenames(self.text_set[index][1])
         else:
             return self.noisy_set[index], self.clean_set[index]
