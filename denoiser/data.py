@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 def parse_filenames(path_list):
     paths = []
     for path in path_list:
+        print(path)
         file_name = path.split('/')[-1].replace('.wav', '')
         id1, id2, id3 = file_name.split('-')
         paths.append((id1,id2,id3))
